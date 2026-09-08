@@ -19,4 +19,24 @@ ht_hash_table* ht_new(){
     return ht;
 }
 
+//Deletes a single key and value in the hash table
+static void ht_del_item(ht_item* i) {
+    free(i->key);
+    free(i->value);
+    free(i);
+}
+
+//Deletes the full hash table
+void ht_del_hash_table(ht_hash_table* ht){
+    for (int i = 0; i < ht->size; i++){
+        ht_item* item = ht->items[i];
+        if(item != NULL){
+            ht_del_item(item);
+        }
+    }
+
+    free(ht->items);
+    free(ht);
+}
+
 
