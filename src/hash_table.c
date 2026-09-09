@@ -3,6 +3,7 @@
 
 #include "hash_table.h"
 
+//Creates a new item
 static ht_item* ht_new_item(const char* k, const char* v){
     ht_item* i = malloc(sizeof(ht_item));
     i->key = strdup(k);
@@ -10,6 +11,7 @@ static ht_item* ht_new_item(const char* k, const char* v){
     return i;
 }
 
+//Creates a new Hash table
 ht_hash_table* ht_new(){
     ht_hash_table* ht = malloc(sizeof(ht_hash_table));
 
@@ -38,5 +40,25 @@ void ht_del_hash_table(ht_hash_table* ht){
     free(ht->items);
     free(ht);
 }
+
+//Hash Function
+static int ht_hash(const char* s, const int prime, const int len){
+    long hash = 0;
+    const int len_s = strlen(s);
+    for(int i = 0; i < len_s; i++){
+        hash +=(long)pow(prime, len_s - (i+1)) * s[i];
+        hash = hash % len;
+    }
+    return (int)hash;
+}
+
+//Collision resolution
+static int ht_get_hash(const char* s, const int num_buckets, const int attempt){
+    const int hash_a = ht_hash(s, HT_PRIME_1, num_buckets);
+    const int hash_b = ht_hash(s, HT_PRIME_2, num_buckets);
+    return (hash_a + (attempt * (hash_b + 1))) % num_buckets;
+}
+
+
 
 
