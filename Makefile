@@ -12,7 +12,7 @@ OBJECTS = $(BUILD_DIR)/hash_table.o \
 TARGET = $(BUILD_DIR)/test_hash_table
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) -lm
 
 $(BUILD_DIR)/hash_table.o: $(SRC_DIR)/hash_table.c $(SRC_DIR)/hash_table.h
 	mkdir -p $(BUILD_DIR)
