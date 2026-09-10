@@ -59,6 +59,21 @@ static int ht_get_hash(const char* s, const int num_buckets, const int attempt){
     return (hash_a + (attempt * (hash_b + 1))) % num_buckets;
 }
 
+void insert_ht(ht_hash_table* ht, const char* key, const char* value){
+    ht_item* item = ht_new_item(key, value);
+
+    int index = ht_get_hash(item->key, ht->size, 0);
+    ht_item* cur_item = ht->items[index];
+
+    int i = 1;
+    while (cur_item != NULL){
+        index = ht_get_hash(item->key, ht->size, i){
+            
+        }
+    }
+
+}
+
 
 
 
