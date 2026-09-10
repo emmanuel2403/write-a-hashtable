@@ -1,13 +1,19 @@
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "hash_table.h"
+#include "prime.h"
 
 int HT_PRIME_1 = 137;
 int HT_PRIME_2 = 139;
 int HT_INITIAL_BASE_SIZE = 129; 
 
 static ht_item HT_DELETED_ITEM = {NULL, NULL};
+
+static ht_hash_table* ht_new_sized(const int base_size);
+static void ht_resize_up(ht_hash_table* ht);
+static void ht_resize_down(ht_hash_table* ht);
 
 //Creates a new item
 static ht_item* ht_new_item(const char* k, const char* v){
@@ -69,6 +75,12 @@ static int ht_get_hash(const char* s, const int num_buckets, const int attempt){
 
 //Insert
 void ht_insert(ht_hash_table* ht, const char* key, const char* value){
+    //Keeps the amount of used cells in the hash at or below 70%
+    const int load = ht->count * 100 / ht->size;
+    if(load > 70){
+        ht_resize_up(ht);
+    }
+
     ht_item* item = ht_new_item(key, value);
 
     int index = ht_get_hash(item->key, ht->size, 0);
@@ -112,13 +124,18 @@ char* ht_search(ht_hash_table* ht, const char* key){
 
 //Delete
 void ht_delete(ht_hash_table* ht, const char* key){
+    const int load = ht->count * 100 / ht->size;
+    if (load < 10){
+        ht_resize_down(ht);
+    }
+
     int index = ht_get_hash(key, ht->size, 0);
     ht_item* item = ht->items[index];
     int i = 1;
     while (item != NULL){
         if(item!= &HT_DELETED_ITEM){
-            if(strmp(item->key, key) == 0){
-                ht_delete_item(item);
+            if(strcmp(item->key, key) == 0){
+                ht_del_item(item);
                 ht->items[index] = &HT_DELETED_ITEM;
             }
         }
@@ -147,7 +164,7 @@ static void ht_resize(ht_hash_table* ht, const int base_size){
     }
 
     ht_hash_table* new_ht = ht_new_sized(base_size);
-    for(int i = 0; i < ht->size, i++){
+    for(int i = 0; i < ht->size; i++){
         ht_item* item = ht->items[i];
         if(item != NULL && item != &HT_DELETED_ITEM){
             ht_insert(new_ht, item->key, item->value);
