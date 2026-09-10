@@ -3,6 +3,9 @@
 
 #include "hash_table.h"
 
+int HT_PRIME_1 = 79;
+int HT_PRIME_2 = 83;
+
 //Creates a new item
 static ht_item* ht_new_item(const char* k, const char* v){
     ht_item* i = malloc(sizeof(ht_item));
@@ -67,10 +70,12 @@ void insert_ht(ht_hash_table* ht, const char* key, const char* value){
 
     int i = 1;
     while (cur_item != NULL){
-        index = ht_get_hash(item->key, ht->size, i){
-            
-        }
+        index = ht_get_hash(item->key, ht->size, i);
+        cur_item = ht->items[index];
+        i++;
     }
+    ht->items[index] = item;
+    ht->count++;
 
 }
 
