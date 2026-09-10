@@ -5,6 +5,7 @@
 
 int HT_PRIME_1 = 137;
 int HT_PRIME_2 = 139;
+int HT_INITIAL_BASE_SIZE = 129; 
 
 static ht_item HT_DELETED_ITEM = {NULL, NULL};
 
@@ -18,12 +19,14 @@ static ht_item* ht_new_item(const char* k, const char* v){
 
 //Creates a new Hash table
 ht_hash_table* ht_new(){
-    ht_hash_table* ht = malloc(sizeof(ht_hash_table));
+    // ht_hash_table* ht = malloc(sizeof(ht_hash_table));
 
-    ht-> size = 53;
-    ht->count = 0;
-    ht->items = calloc((size_t)ht->size, sizeof(ht_item*));
-    return ht;
+    // ht-> size = 53;
+    // ht->count = 0;
+    // ht->items = calloc((size_t)ht->size, sizeof(ht_item*));
+    // return ht;
+
+    return ht_new_sized(HT_INITIAL_BASE_SIZE);
 }
 
 //Deletes a single key and value in the hash table
@@ -72,7 +75,14 @@ void ht_insert(ht_hash_table* ht, const char* key, const char* value){
     ht_item* cur_item = ht->items[index];
 
     int i = 1;
-    while (cur_item != NULL && cur_item != &HT_DELETED_ITEM){
+    while (cur_item != NULL){
+    if(cur_item != &HT_DELETED_ITEM){
+        if(strcmp(cur_item->key, key) == 0){
+            ht_del_item(cur_item);
+            ht->items[index] = item;
+            return;
+        }
+    }
         index = ht_get_hash(item->key, ht->size, i);
         cur_item = ht->items[index];
         i++;
@@ -118,6 +128,57 @@ void ht_delete(ht_hash_table* ht, const char* key){
     }
     ht->count --;
 }
+
+// Creates a new hash table with specified base size
+static ht_hash_table* ht_new_sized(const int base_size){
+    ht_hash_table* ht = xmalloc(sizeof(ht_hash_table));
+    ht->base_size = base_size;
+    ht->size = next_prime(ht->base_size);
+
+    ht->count = 0;
+    ht->items = xcalloc((size_t)ht->size, sizeof(ht_item*));
+    return ht;
+}
+
+//Resizing the hash table
+static void ht_resize(ht_hash_table* ht, const int base_size){
+    if(base_size < HT_INITIAL_BASE_SIZE){
+        return;
+    }
+
+    ht_hash_table* new_ht = ht_new_sized(base_size);
+    for(int i = 0; i < ht->size, i++){
+        ht_item* item = ht->items[i];
+        if(item != NULL && item != &HT_DELETED_ITEM){
+            ht_insert(new_ht, item->key, item->value);
+        }
+    }
+
+    ht->base_size = new_ht->base_size;
+    ht->count = new_ht->count;
+
+    const int tmp_size = ht->size;
+    ht->size = new_ht->size;
+    new_ht->size = tmp_size;
+
+    ht_item** tmp_items = ht->items;
+    ht->items = new_ht->items;
+    new_ht->items = tmp_items;
+
+    ht_del_hash_table(new_ht);
+}
+
+static void ht_resize_up(ht_hash_table* ht){
+    const int new_size = ht->base_size * 2;
+    ht_resize(ht, new_size);
+}
+
+static void ht_resize_down(ht_hash_table* ht){
+    const int new_size =  ht->base_size / 2;
+    ht_resize(ht, new_size);
+}
+
+
 
 
 
